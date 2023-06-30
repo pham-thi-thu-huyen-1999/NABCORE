@@ -1,0 +1,68 @@
+stages:
+  #  - build
+  - deploy
+#
+#build-image:
+#  stage: build
+#  image: node:lts
+#  before_script:
+#    - yarn install
+#  #  cache:
+#  #    key: npm-install
+#  #    paths:
+#  #      - node_modules
+#  #  before_script:
+#  #    - docker version
+#  #    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#  artifacts:
+#    name: "build-image"
+#    when: 'always'
+#    paths:
+#      - ./shri-revamp-components/build
+#    expire_in: 1 week
+#  script:
+#    - cd shri-revamp-components && yarn && yarn prod
+#  tags:
+#    - docker
+#  only:
+#    #changes:
+#    # Issues: only take changes from app folder. If app/api/* change will not build. TODO:: need find the work around if want to use this.
+#    #- package.json
+#    refs:
+#      - staging
+
+
+deploy-staging:
+  stage: deploy
+  #  rules:
+  #    - changes:
+  #        - Dockerfile
+  #        - app/*
+  #      when: always
+  #---CACHE things----
+  #  cache:
+  #    key: npm-install
+  #    paths:
+  #      - app/node_modules
+  #---END CACHE things----
+  # this dependencies value: name of the artifacts describe which artifacts will be used.
+  #  dependencies:
+  #    - build-image
+  before_script:
+    - unset NPM_CONFIG_PREFIX
+    - nvm install v16
+    - npm install -g cross-env
+    - cd /home/gitlab-runner/builds/XtiCz5So/0/techvsisg/thepineapple/nabcore
+    - yarn
+    - yarn prod
+  script:
+    - cp -rf /home/gitlab-runner/builds/XtiCz5So/0/techvsisg/thepineapple/nabcore/* /var/www/html/nabcore/wp-content/plugins/nabcore
+  tags:
+    - shell
+  only:
+    #    changes:
+    #      - Dockerfile
+    # Issues: only take changes from app folder. If app/api/* change will not build. TODO:: need find the work around if want to use this.
+    #      - app/*
+    refs:
+      - staging
